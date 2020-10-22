@@ -2,7 +2,7 @@
     "source_train_dir": "/data/datasets/hmdb_ucf/hmdb/train",
     "target_train_dir": "/data/datasets/hmdb_ucf/ucf/train",
     "val_dir": "/data/datasets/hmdb_ucf/ucf/test",
-    "wandb": 1,
+    "wandb": 0,
     "project_name": "TA3N_baseline",
     "run_name": "hmdb2ucf"
 }
