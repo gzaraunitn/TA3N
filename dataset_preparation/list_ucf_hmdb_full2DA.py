@@ -20,55 +20,55 @@ args = parser.parse_args()
 
 ###### Function for list generation ######
 def gen_list_DA(path_input_list, class_indices_DA, class_names_DA, list_type):
-	path_output = args.data_path + args.dataset + '/' + 'list_' + args.dataset + '_' + list_type + args.suffix + '.txt'
-	file_write = open(path_output,'w')
-	class_indices_DA_unique = list(set(class_indices_DA))
-	count_video = [0 for i in range(len(class_indices_DA_unique))]
-	for line in open(path_input_list):
-		# 1. parse [path, length, class_id]
-		path_video, len_video, id_video = line.strip().split(' ')
-		path_dataset, frame_in, name_video = path_video.rsplit('/', 2)
+    path_output = args.data_path + args.dataset + '/' + 'list_' + args.dataset + '_' + list_type + args.suffix + '.txt'
+    file_write = open(path_output,'w')
+    class_indices_DA_unique = list(set(class_indices_DA))
+    count_video = [0 for i in range(len(class_indices_DA_unique))]
+    for line in open(path_input_list):
+        # 1. parse [path, length, class_id]
+        path_video, len_video, id_video = line.strip().split(' ')
+        path_dataset, frame_in, name_video = path_video.rsplit('/', 2)
 
-		# print(path_video, len_video, id_video)
-		# print(path_dataset, frame_in, name_video)
-		# exit()
+        # print(path_video, len_video, id_video)
+        # print(path_dataset, frame_in, name_video)
+        # exit()
 
-		check_class = False
+        check_class = False
 
-		if args.dataset == 'hmdb51':
-			name_video_short = name_video.rsplit('_',6)[0] # remove the suffix
-			name_str = name_video_short.rsplit('_',2)[-2:] # remove the prefix
-			class_str = '_'.join(name_str) # join the strings
-		
-			if class_str.split('_')[1] in class_names_DA:
-				check_class = True
-				id_video_DA = class_indices_DA[class_names_DA.index(class_str.split('_')[1])]
-			elif class_str in class_names_DA:
-				check_class = True
-				id_video_DA = class_indices_DA[class_names_DA.index(class_str)]
-		
-		elif args.dataset == 'ucf101':
-			class_str = name_video.split('_')[1]
-			if class_str in class_names_DA:
-				check_class = True
-				id_video_DA = class_indices_DA[class_names_DA.index(class_str)]
+        if args.dataset == 'hmdb51':
+            name_video_short = name_video.rsplit('_',6)[0] # remove the suffix
+            name_str = name_video_short.rsplit('_',2)[-2:] # remove the prefix
+            class_str = '_'.join(name_str) # join the strings
+        
+            if class_str.split('_')[1] in class_names_DA:
+                check_class = True
+                id_video_DA = class_indices_DA[class_names_DA.index(class_str.split('_')[1])]
+            elif class_str in class_names_DA:
+                check_class = True
+                id_video_DA = class_indices_DA[class_names_DA.index(class_str)]
+        
+        elif args.dataset == 'ucf101':
+            class_str = name_video.split('_')[1]
+            if class_str in class_names_DA:
+                check_class = True
+                id_video_DA = class_indices_DA[class_names_DA.index(class_str)]
 
-		if check_class:
-			# 2. rearrange and write a new line
-			count_video[class_indices_DA_unique.index(id_video_DA)] += 1
+        if check_class:
+            # 2. rearrange and write a new line
+            count_video[class_indices_DA_unique.index(id_video_DA)] += 1
 
-			if args.method_read == 'frame':
-				len_video = str(len(os.listdir(path_dataset + '/' + args.frame_in  + '/' + name_video)))
+            if args.method_read == 'frame':
+                len_video = str(len(os.listdir(path_dataset + '/' + args.frame_in  + '/' + name_video)))
 
-			line_new = path_dataset + '/' + args.frame_in  + '/' + name_video + ' ' + len_video + ' ' + str(id_video_DA) + '\n'
-			file_write.write(line_new)
+            line_new = path_dataset + '/' + args.frame_in  + '/' + name_video + ' ' + len_video + ' ' + str(id_video_DA) + '\n'
+            file_write.write(line_new)
 
-	file_write.close()
+    file_write.close()
 
-	# print the video # in each class
-	print(path_output)
-	for j in range(len(count_video)):
-		print(class_indices_DA_unique[j], count_video[j])
+    # print the video # in each class
+    print(path_output)
+    for j in range(len(count_video)):
+        print(class_indices_DA_unique[j], count_video[j])
 
 ###### data path ######
 print(Fore.GREEN + 'dataset:', args.dataset)

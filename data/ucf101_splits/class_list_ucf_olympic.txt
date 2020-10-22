@@ -1,4 +1,4 @@
-0 Basketball 					
+0 Basketball                     
 1 CleanAndJerk
 3 Diving
 4 PoleVault

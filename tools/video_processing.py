@@ -30,7 +30,7 @@ path_video_in = args.data_path + args.video_in
 #--- create the output folder
 path_output = args.data_path + args.write_video + '/'
 if not os.path.isdir(path_output) and args.write_video:
-	os.makedirs(path_output)
+    os.makedirs(path_output)
 
 ###### Prepare the video i/o ######
 # meta_data: nframes, fps, size, duration
@@ -40,26 +40,26 @@ num_frames_total = reader.get_meta_data()['nframes']
 fps = reader.get_meta_data()['fps']
 video_name = args.video_in.split('.')[0]
 if args.write_video:
-	writer = imageio.get_writer(path_output + video_name + '_proc.mp4', fps=fps)
+    writer = imageio.get_writer(path_output + video_name + '_proc.mp4', fps=fps)
 
 ###### Video Processing ######
 start = time.time()
 print(Fore.CYAN + 'Process the video......')
 size = cv2.getTextSize('Frame: ', cv2.FONT_HERSHEY_SIMPLEX, 1, 2)[0]
 try:
-	for t, im in tqdm(enumerate(reader)):
-		if np.sum(im.shape) != 0:
-			im_new = im
-			line = 'Frame: ' + str(t)
-			if args.write_video:
-				cv2.putText(im_new, line, (10, int(size[1] * 1.5)), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
-				writer.append_data(im_new)
+    for t, im in tqdm(enumerate(reader)):
+        if np.sum(im.shape) != 0:
+            im_new = im
+            line = 'Frame: ' + str(t)
+            if args.write_video:
+                cv2.putText(im_new, line, (10, int(size[1] * 1.5)), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
+                writer.append_data(im_new)
 
 except RuntimeError:
-	print(Back.RED + 'Could not read frame', t + 1, 'from', args.video_in)
+    print(Back.RED + 'Could not read frame', t + 1, 'from', args.video_in)
 
 if args.write_video:
-	writer.close()
+    writer.close()
 
 end = time.time()
 print('Total elapsed time: ' + str(end - start))

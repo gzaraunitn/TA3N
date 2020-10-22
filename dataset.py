@@ -9,6 +9,18 @@ import torch
 from colorama import init
 from colorama import Fore, Back, Style
 
+import random
+from os import listdir
+from os.path import join, splitext
+
+import numpy as np
+import torch
+import torch.nn.functional as F
+import torchvision.transforms.functional as TF
+from PIL import Image, ImageFilter, ImageFile
+from torch.utils.data import DataLoader, Dataset
+from torchvision import transforms
+
 init(autoreset=True)
 
 class VideoRecord(object):
@@ -145,3 +157,90 @@ class TSNDataSet(data.Dataset):
 
     def __len__(self):
         return len(self.video_list)
+
+
+class VideoDataset(data.Dataset):
+
+    def __init__(
+        self,
+        folder,
+        n_frames,
+        frame_size=224,
+        separator="_"
+    ):
+
+        self.folder = folder
+        self.num_segments = n_frames
+        self.frame_size = frame_size
+
+        self.data_transform = transforms.Compose(
+            [
+                transforms.Resize(self.frame_size),
+                transforms.CenterCrop(self.frame_size),
+                transforms.ToTensor(),
+                transforms.Normalize(
+                    mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
+                ),
+            ]
+        )
+
+        self.separator = separator
+        self.classes = [c for c in sorted(listdir(folder))]
+        self.videos_with_classes = []
+
+        for c_index, c in enumerate(self.classes):
+            c_path = join(self.folder, c)
+            videos = listdir(c_path)
+            for v in videos:
+                v_path = join(c_path, v)
+                num_frames = len(listdir(v_path))
+                if num_frames >= self.num_segments:
+                    pair = (v_path, c_index)
+                    self.videos_with_classes.append(pair)
+                
+
+    def _get_test_indices(self, num_frames):
+        num_min = self.num_segments
+        num_select = num_frames
+
+        if num_frames >= num_min:
+            tick = float(num_select) / float(self.num_segments)
+            offsets = np.array(
+                [int(tick / 2.0 + tick * float(x)) for x in range(self.num_segments)]
+            )  # pick the central frame in each segment
+        else:  # the video clip is too short --> duplicate the last frame
+            id_select = np.array([x for x in range(num_select)])
+            # expand to the length of self.num_segments with the last element
+            id_expand = (
+                np.ones(self.num_segments - num_select, dtype=int)
+                * id_select[id_select[0] - 1]
+            )
+            offsets = np.append(id_select, id_expand)
+
+        return offsets
+
+    def __getitem__(self, index):
+
+        video, label = self.videos_with_classes[index]
+        frames_temp = sorted(
+            listdir(video),
+            key=lambda path: int(path.split(self.separator)[-1].split(".")[0]),
+        )
+        frames = [f for f in frames_temp if f.endswith('jpg') or f.endswith('jpeg')]
+        num_frames = len(frames)
+
+        data = []
+
+        segment_indices = self._get_test_indices(num_frames)
+        for index in segment_indices:
+            frame = frames[index]
+            frame_path = join(video, frame)
+            frame_img = Image.open(frame_path)
+            frame_feat = self.data_transform(frame_img)
+            data.append(frame_feat)
+        tensor = torch.stack(data)
+
+        return tensor, label
+
+    def __len__(self):
+        return len(self.videos_with_classes)
