@@ -1096,38 +1096,15 @@ class ResNet(nn.Module):
 
         if self.version == "resnet18":
             self.model = nn.Sequential(
-                nn.Conv2d(3, 64, kernel_size=(3, 3), stride=1, padding=1, bias=False),
-                nn.BatchNorm2d(64),
-                nn.ReLU(),
-                *list(resnet18(pretrained=pretrained).children())[4:-1]
+                *list(resnet18(pretrained=pretrained).children())[:-1]
             )
         elif self.version == "resnet50":
             self.model = nn.Sequential(
-                nn.Conv2d(
-                    3,
-                    64,
-                    kernel_size=(3, 3),
-                    stride=1,
-                    padding=1,
-                    bias=False,
-                ),
-                nn.BatchNorm2d(64),
-                nn.ReLU(),
-                *list(resnet50(pretrained=pretrained).children())[4:-1]
+                *list(resnet50(pretrained=pretrained).children())[:-1]
             )
         else:
             self.model = nn.Sequential(
-                nn.Conv2d(
-                    3,
-                    64,
-                    kernel_size=(3, 3),
-                    stride=1,
-                    padding=1,
-                    bias=False,
-                ),
-                nn.BatchNorm2d(64),
-                nn.ReLU(),
-                *list(resnet101(pretrained=pretrained).children())[4:-1]
+                *list(resnet101(pretrained=pretrained).children())[:-1]
             )
 
     def forward(self, X):
