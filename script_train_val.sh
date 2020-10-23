@@ -13,8 +13,8 @@ baseline_type=video
 frame_aggregation=trn-m # method to integrate the frame-level features (avgpool | trn | trn-m | rnn | temconv)
 add_fc=1
 fc_dim=512
-arch=resnet101
-use_target=uSv # none | Sv | uSv
+arch=resnet18
+use_target=Sv # none | Sv | uSv
 share_params=Y # Y | N
 
 if [ "$use_target" == "none" ] 
@@ -93,7 +93,7 @@ ens_DA=none # none | MCD
 mu=0
 
 # parameters for architectures
-bS=128 # batch size
+bS=32 # batch size
 bS_2=$((bS * num_target / num_source ))
 echo '('$bS', '$bS_2')'
 
@@ -141,7 +141,7 @@ then
     gd=20
     
     #------ main command ------#
-    CUDA_VISIBLE_DEVICES=0,1 python3 main.py $class_file $modality $train_source_list $train_target_list $val_list --exp_path $exp_path \
+    CUDA_VISIBLE_DEVICES=0 python3 main.py $class_file $modality $train_source_list $train_target_list $val_list --exp_path $exp_path \
     --arch $arch --pretrained $pretrained --baseline_type $baseline_type --frame_aggregation $frame_aggregation \
     --num_segments $num_segments --val_segments $val_segments --add_fc $add_fc --fc_dim $fc_dim --dropout_i 0.5 --dropout_v 0.5 \
     --use_target $use_target --share_params $share_params \
@@ -152,7 +152,7 @@ then
     --use_attn $use_attn --n_attn $n_attn --use_attn_frame $use_attn_frame \
     --gd $gd --lr $lr --lr_decay $lr_decay --lr_adaptive $lr_adaptive --lr_steps $lr_steps_1 $lr_steps_2 --epochs $epochs --optimizer $optimizer \
     --n_rnn 1 --rnn_cell LSTM --n_directions 1 --n_ts 5 \
-    -b $bS $bS_2 $bS -j 4 -ef 1 -pf 50 -sf 50 --copy_list N N --save_model \
+    -b $bS $bS_2 $bS -j 0 -ef 1 -pf 50 -sf 50 --copy_list N N --save_model \
 
 fi
 

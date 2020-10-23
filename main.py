@@ -93,7 +93,7 @@ def main():
         writer = SummaryWriter(path_exp + "/tensorboard")  # for tensorboardX
 
     # === initialize the model ===#
-    print(Fore.CYAN + "preparing the model......")
+    print(Fore.CYAN + "preparing the model with {}".format(args.arch))
     model = VideoModel(
         num_class,
         args.baseline_type,
@@ -138,7 +138,7 @@ def main():
     if args.optimizer == "SGD":
         print(Fore.YELLOW + "using SGD")
         optimizer = torch.optim.SGD(
-            model.parameters(),
+            filtered_parameters,
             args.lr,
             momentum=args.momentum,
             weight_decay=args.weight_decay,
@@ -147,7 +147,7 @@ def main():
     elif args.optimizer == "Adam":
         print(Fore.YELLOW + "using Adam")
         optimizer = torch.optim.Adam(
-            model.parameters(), args.lr, weight_decay=args.weight_decay
+            filtered_parameters, args.lr, weight_decay=args.weight_decay
         )
     else:
         print(Back.RED + "optimizer not support or specified!!!")
@@ -263,24 +263,24 @@ def main():
 
         source_set = VideoDataset(source_train_dir, args.num_segments)
 
-        source_sampler = torch.utils.data.sampler.RandomSampler(source_set)
+        # source_sampler = torch.utils.data.sampler.RandomSampler(source_set)
         source_loader = torch.utils.data.DataLoader(
             source_set,
             batch_size=args.batch_size[0],
-            shuffle=False,
-            sampler=source_sampler,
+            shuffle=True,
+            # sampler=source_sampler,
             num_workers=args.workers,
             pin_memory=True,
         )
 
         target_set = VideoDataset(target_train_dir, args.num_segments)
 
-        target_sampler = torch.utils.data.sampler.RandomSampler(target_set)
+        # target_sampler = torch.utils.data.sampler.RandomSampler(target_set)
         target_loader = torch.utils.data.DataLoader(
             target_set,
             batch_size=args.batch_size[1],
-            shuffle=False,
-            sampler=target_sampler,
+            shuffle=True,
+            # sampler=target_sampler,
             num_workers=args.workers,
             pin_memory=True,
         )
@@ -511,6 +511,8 @@ def train(
                 args.batch_size[0] - batch_source_ori,
                 source_size_ori[1],
                 source_size_ori[2],
+                source_size_ori[3],
+                source_size_ori[4]
             )
             source_data = torch.cat((source_data, source_data_dummy))
         if batch_target_ori < args.batch_size[1]:
@@ -534,6 +536,8 @@ def train(
                 gpu_count - target_data.size(0) % gpu_count,
                 target_data.size(1),
                 target_data.size(2),
+                target_data.size(3),
+                target_data.size(4)
             )
             target_data = torch.cat((target_data, target_data_dummy))
 
@@ -1075,7 +1079,7 @@ def validate(val_loader, model, criterion, num_class, epoch, log):
         # add dummy tensors to keep the same batch size for each epoch (for the last epoch)
         if batch_val_ori < args.batch_size[2]:
             val_data_dummy = torch.zeros(
-                args.batch_size[2] - batch_val_ori, val_size_ori[1], val_size_ori[2]
+                args.batch_size[2] - batch_val_ori, val_size_ori[1], val_size_ori[2], val_size_ori[3], val_size_ori[4]
             )
             val_data = torch.cat((val_data, val_data_dummy))
 
@@ -1299,7 +1303,7 @@ def count_samples(dataset):
 
 def get_class_ids(dataset):
     res = []
-    classes = sorted(os.listdir(dataset))
+    classes = os.listdir(dataset)
     label_map = {label: i for i, label in enumerate(classes)}
     for c in classes:
         c_path = os.path.join(dataset, c)
