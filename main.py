@@ -35,7 +35,7 @@ gpu_count = torch.cuda.device_count()
 
 
 def main():
-    global args, best_prec1, writer, source_train_dir, traget_train_dir, val_dir, wandb_enabled
+    global args, best_prec1, writer, source_train_dir, traget_train_dir, val_dir, wandb_enabled, place_adv
     args = parser.parse_args()
 
     with open("config.json", "r") as config_file:
@@ -46,6 +46,16 @@ def main():
         wandb_enabled = config["wandb"]
         project_name = config["project_name"]
         run_name = config["run_name"]
+        place_adv = []
+        place_adv.append("Y")
+        if bool(config["frame_level"]):
+            place_adv.append("Y")
+        else:
+            place_adv.append("N")
+        if bool(config["video_level"]):
+            place_adv.append("Y")
+        else:
+            place_adv.append("N")
 
     if wandb_enabled:
         wandb.init(
@@ -520,6 +530,8 @@ def train(
                 args.batch_size[1] - batch_target_ori,
                 target_size_ori[1],
                 target_size_ori[2],
+                target_size_ori[3],
+                target_size_ori[4]
             )
             target_data = torch.cat((target_data, target_data_dummy))
 
@@ -788,8 +800,8 @@ def train(
             pred_domain_all = []
             pred_domain_target_all = []
 
-            for l in range(len(args.place_adv)):
-                if args.place_adv[l] == "Y":
+            for l in range(len(place_adv)):
+                if place_adv[l] == "Y":
 
                     # reshape the features (e.g. 128x5x2 --> 640x2)
                     pred_domain_source_single = pred_domain_source[l].view(

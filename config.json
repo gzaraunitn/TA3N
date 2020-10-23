@@ -1,8 +1,10 @@
 {
-    "source_train_dir": "/data/datasets/hmdb_ucf/hmdb/train",
-    "target_train_dir": "/data/datasets/hmdb_ucf/ucf/train",
-    "val_dir": "/data/datasets/hmdb_ucf/ucf/test",
-    "wandb": 0,
+    "source_train_dir": "/data/datasets/ucf_olympics/olympics/train",
+    "target_train_dir": "/data/datasets/ucf_olympics/ucf/train",
+    "val_dir": "/data/datasets/ucf_olympics/ucf/test",
+    "wandb": 1,
     "project_name": "TA3N_baseline",
-    "run_name": "hmdb2ucf"
+    "run_name": "olympics2ucf_frame_small_batch",
+    "video_level": 0,
+    "frame_level": 1
 }
