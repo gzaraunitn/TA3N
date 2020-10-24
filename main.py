@@ -35,7 +35,7 @@ gpu_count = torch.cuda.device_count()
 
 
 def main():
-    global args, best_prec1, writer, source_train_dir, traget_train_dir, val_dir, wandb_enabled, place_adv
+    global args, best_prec1, writer, source_train_dir, traget_train_dir, val_dir, wandb_enabled, place_adv, batch_sizes
     args = parser.parse_args()
 
     with open("config.json", "r") as config_file:
@@ -46,6 +46,26 @@ def main():
         wandb_enabled = config["wandb"]
         project_name = config["project_name"]
         run_name = config["run_name"]
+        
+    # calculate the number of videos to load for training in each list ==> make sure the iteration # of source & target are same
+    num_source = count_samples(source_train_dir)
+    num_target = count_samples(target_train_dir)
+    num_val = count_samples(val_dir)
+    
+    batch_ok = True
+    if ("hmdb" in source_train_dir) or ("hmdb" in target_train_dir):
+        batch_size_source = 128
+    elif ("olympics" in source_train_dir) or ("olympics" in target_train_dir):
+        batch_size_source = 32
+    else:
+        batch_ok = False
+    
+    if batch_ok:
+        batch_sizes = [batch_size_source, int(batch_size_source * num_target / num_source), batch_size_source]
+    else:
+        batch_sizes = args.batch_size
+        
+    assert len(batch_sizes) == 3
 
     if wandb_enabled:
         wandb.init(
@@ -213,21 +233,16 @@ def main():
     elif args.modality in ["Flow", "RGBDiff", "RGBDiff2", "RGBDiffplus"]:
         data_length = 5
 
-    # calculate the number of videos to load for training in each list ==> make sure the iteration # of source & target are same
-    num_source = count_samples(source_train_dir)
-    num_target = count_samples(target_train_dir)
-    num_val = count_samples(val_dir)
-
-    num_iter_source = num_source / args.batch_size[0]
-    num_iter_target = num_target / args.batch_size[1]
+    num_iter_source = num_source / batch_sizes[0]
+    num_iter_target = num_target / batch_sizes[1]
     num_max_iter = max(num_iter_source, num_iter_target)
     num_source_train = (
-        round(num_max_iter * args.batch_size[0])
+        round(num_max_iter * batch_sizes[0])
         if args.copy_list[0] == "Y"
         else num_source
     )
     num_target_train = (
-        round(num_max_iter * args.batch_size[1])
+        round(num_max_iter * batch_sizes[1])
         if args.copy_list[1] == "Y"
         else num_target
     )
@@ -253,7 +268,7 @@ def main():
     val_set = VideoDataset(val_dir, args.num_segments)
     val_loader = torch.utils.data.DataLoader(
         val_set,
-        batch_size=args.batch_size[2],
+        batch_size=batch_sizes[2],
         shuffle=False,
         num_workers=args.workers,
         pin_memory=True,
@@ -266,7 +281,7 @@ def main():
         # source_sampler = torch.utils.data.sampler.RandomSampler(source_set)
         source_loader = torch.utils.data.DataLoader(
             source_set,
-            batch_size=args.batch_size[0],
+            batch_size=batch_sizes[0],
             shuffle=True,
             # sampler=source_sampler,
             num_workers=args.workers,
@@ -278,7 +293,7 @@ def main():
         # target_sampler = torch.utils.data.sampler.RandomSampler(target_set)
         target_loader = torch.utils.data.DataLoader(
             target_set,
-            batch_size=args.batch_size[1],
+            batch_size=batch_sizes[1],
             shuffle=True,
             # sampler=target_sampler,
             num_workers=args.workers,
@@ -506,18 +521,18 @@ def train(
         batch_source_ori = source_size_ori[0]
         batch_target_ori = target_size_ori[0]
         # add dummy tensors to keep the same batch size for each epoch (for the last epoch)
-        if batch_source_ori < args.batch_size[0]:
+        if batch_source_ori < batch_sizes[0]:
             source_data_dummy = torch.zeros(
-                args.batch_size[0] - batch_source_ori,
+                batch_sizes[0] - batch_source_ori,
                 source_size_ori[1],
                 source_size_ori[2],
                 source_size_ori[3],
                 source_size_ori[4]
             )
             source_data = torch.cat((source_data, source_data_dummy))
-        if batch_target_ori < args.batch_size[1]:
+        if batch_target_ori < batch_sizes[1]:
             target_data_dummy = torch.zeros(
-                args.batch_size[1] - batch_target_ori,
+                batch_sizes[1] - batch_target_ori,
                 target_size_ori[1],
                 target_size_ori[2],
                 target_size_ori[3],
@@ -1079,9 +1094,9 @@ def validate(val_loader, model, criterion, num_class, epoch, log):
         batch_val_ori = val_size_ori[0]
 
         # add dummy tensors to keep the same batch size for each epoch (for the last epoch)
-        if batch_val_ori < args.batch_size[2]:
+        if batch_val_ori < batch_sizes[2]:
             val_data_dummy = torch.zeros(
-                args.batch_size[2] - batch_val_ori, val_size_ori[1], val_size_ori[2], val_size_ori[3], val_size_ori[4]
+                batch_sizes[2] - batch_val_ori, val_size_ori[1], val_size_ori[2], val_size_ori[3], val_size_ori[4]
             )
             val_data = torch.cat((val_data, val_data_dummy))
 
