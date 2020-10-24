@@ -908,6 +908,7 @@ def train(
         # compute gradient and do SGD step
         optimizer.zero_grad()
 
+        assert loss.item()
         loss.backward()
 
         if args.clip_gradient is not None:
