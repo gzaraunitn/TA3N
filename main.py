@@ -46,16 +46,6 @@ def main():
         wandb_enabled = config["wandb"]
         project_name = config["project_name"]
         run_name = config["run_name"]
-        place_adv = []
-        place_adv.append("Y")
-        if bool(config["frame_level"]):
-            place_adv.append("Y")
-        else:
-            place_adv.append("N")
-        if bool(config["video_level"]):
-            place_adv.append("Y")
-        else:
-            place_adv.append("N")
 
     if wandb_enabled:
         wandb.init(
@@ -800,8 +790,8 @@ def train(
             pred_domain_all = []
             pred_domain_target_all = []
 
-            for l in range(len(place_adv)):
-                if place_adv[l] == "Y":
+            for l in range(len(args.place_adv)):
+                if args.place_adv[l] == "Y":
 
                     # reshape the features (e.g. 128x5x2 --> 640x2)
                     pred_domain_source_single = pred_domain_source[l].view(
