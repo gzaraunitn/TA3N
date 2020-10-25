@@ -73,7 +73,7 @@ pretrained=none
 #====== parameters for algorithms ======#
 # parameters for DA approaches
 dis_DA=DAN # none | DAN | JAN
-alpha=0 # depend on users
+alpha=1 # depend on users
 
 adv_pos_0=Y # Y | N (discriminator for relation features)
 adv_DA=none # none | RevGrad
@@ -141,7 +141,7 @@ then
     gd=20
     
     #------ main command ------#
-    CUDA_VISIBLE_DEVICES=0,1,2,3 python3 main.py $class_file $modality $train_source_list $train_target_list $val_list --exp_path $exp_path \
+    CUDA_VISIBLE_DEVICES=4,5,6,7 python3 main.py $class_file $modality $train_source_list $train_target_list $val_list --exp_path $exp_path \
     --arch $arch --pretrained $pretrained --baseline_type $baseline_type --frame_aggregation $frame_aggregation \
     --num_segments $num_segments --val_segments $val_segments --add_fc $add_fc --fc_dim $fc_dim --dropout_i 0.5 --dropout_v 0.5 \
     --use_target $use_target --share_params $share_params \
