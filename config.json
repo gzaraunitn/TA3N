@@ -1,8 +1,8 @@
 {
-    "source_train_dir": "/data/datasets/hmdb_ucf/ucf/train",
-    "target_train_dir": "/data/datasets/hmdb_ucf/hmdb/train",
-    "val_dir": "/data/datasets/hmdb_ucf/hmdb/test",
+    "source_train_dir": "/data/datasets/mixamo_datasets/mixamo5/new_complexity_2",
+    "target_train_dir": "/data/datasets/kinetics_datasets/kinetics5/train",
+    "val_dir": "/data/datasets/kinetics_datasets/kinetics5/test",
     "wandb": 1,
     "project_name": "TA3N_baseline",
-    "run_name": "ucf2hmdb_dann_fixed"
+    "run_name": "mixamo2kinetics"
 }

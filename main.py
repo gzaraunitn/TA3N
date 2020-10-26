@@ -23,6 +23,7 @@ import numpy as np
 from tensorboardX import SummaryWriter
 
 import wandb
+from math import isnan
 
 np.random.seed(1)
 torch.manual_seed(1)
@@ -790,6 +791,19 @@ def train(
                                 )
                                 for t in range(feat_source_sel.size(0))
                             ]
+
+                            a = mmd_rbf(
+                                    feat_source_sel[0],
+                                    feat_target_sel[0],
+                                    kernel_mul=kernel_muls[l],
+                                    kernel_num=kernel_nums[l],
+                                    fix_sigma=fix_sigma_list[l],
+                                    ver=2,
+                                )
+
+                            if isnan(a):
+                                exit()
+                        
                             loss_mmd = sum(losses_mmd) / len(losses_mmd)
 
                             loss_discrepancy += loss_mmd
@@ -907,6 +921,7 @@ def train(
 
         # compute gradient and do SGD step
         optimizer.zero_grad()
+
 
         assert loss.item()
         loss.backward()
