@@ -4,5 +4,5 @@
     "val_dir": "/data/datasets/kinetics_datasets/kinetics5/test",
     "wandb": 1,
     "project_name": "TA3N_baseline",
-    "run_name": "mixamo2kinetics"
+    "run_name": "mixamo2kinetics_video"
 }
