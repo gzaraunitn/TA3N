@@ -47,6 +47,7 @@ def main():
         wandb_enabled = config["wandb"]
         project_name = config["project_name"]
         run_name = config["run_name"]
+        fine_tune = bool(config["fine_tune"])
         
     # calculate the number of videos to load for training in each list ==> make sure the iteration # of source & target are same
     num_source = count_samples(source_train_dir)
@@ -145,16 +146,18 @@ def main():
     if wandb_enabled:
         wandb.watch(model)
 
-    parameters = model.parameters()
-    resnet_parameters = model.resnet.parameters()
-    resnet_p_ids = [id(p) for p in resnet_parameters]
-    filtered_parameters = [p for p in parameters if id(p) not in resnet_p_ids]
+    if not fine_tune:
+        resnet_parameters = model.resnet.parameters()
+        resnet_p_ids = [id(p) for p in resnet_parameters]
+        filtered_parameters = [p for p in parameters if id(p) not in resnet_p_ids]
+
+        params_list = [{"params": filtered_parameters, "lr": args.lr}]
+        for resnet_param in resnet_parameters:
+            resnet_param.requires_grad = False
+    else:
+        filtered_parameters = model.parameters()
 
     model = torch.nn.DataParallel(model).cuda()
-
-    params_list = [{"params": filtered_parameters, "lr": args.lr}]
-    for resnet_param in resnet_parameters:
-        resnet_param.requires_grad = False
 
     if args.optimizer == "SGD":
         print(Fore.YELLOW + "using SGD")
@@ -801,8 +804,8 @@ def train(
                                     ver=2,
                                 )
 
-                            if isnan(a):
-                                exit()
+                            # if isnan(a):
+                            #     exit()
                         
                             loss_mmd = sum(losses_mmd) / len(losses_mmd)
 

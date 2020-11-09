@@ -1,8 +1,9 @@
 {
-    "source_train_dir": "/data/datasets/mixamo_datasets/mixamo5/new_complexity_2",
-    "target_train_dir": "/data/datasets/kinetics_datasets/kinetics5/train",
-    "val_dir": "/data/datasets/kinetics_datasets/kinetics5/test",
+    "source_train_dir": "/data/datasets/mixamo_datasets/mixamo14_split/train",
+    "target_train_dir": "/data/datasets/kinetics_datasets/kinetics14/train",
+    "val_dir": "/data/datasets/kinetics_datasets/kinetics14/test",
     "wandb": 1,
     "project_name": "TA3N_baseline",
-    "run_name": "mixamo2kinetics_video"
+    "run_name": "mixamo14-kinetics14_full_finetune",
+    "fine_tune": 0
 }

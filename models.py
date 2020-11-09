@@ -409,9 +409,11 @@ class VideoModel(nn.Module):
         :return:
         """
         super(VideoModel, self).train(mode)
-        for resnet_param in self.resnet.parameters():
-            resnet_param.requires_grad = False
-        self.resnet.eval()
+
+        if not self.fine_tune:
+            for resnet_param in self.resnet.parameters():
+                resnet_param.requires_grad = False
+            self.resnet.eval()
 
         """
         count = 0
