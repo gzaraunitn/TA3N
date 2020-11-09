@@ -90,6 +90,7 @@ class VideoModel(nn.Module):
         n_attn=1,
         use_attn_frame="none",
         share_params="Y"
+        fine_tune=False
     ):
         super(VideoModel, self).__init__()
 
@@ -121,6 +122,8 @@ class VideoModel(nn.Module):
         self.use_attn = use_attn
         self.n_attn = n_attn
         self.use_attn_frame = use_attn_frame
+
+        self.fine_tune = fine_tune
 
         if new_length is None:
             self.new_length = 1 if modality == "RGB" else 5

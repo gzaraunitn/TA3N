@@ -5,5 +5,5 @@
     "wandb": 1,
     "project_name": "TA3N_baseline",
     "run_name": "mixamo14-kinetics14_full_finetune",
-    "fine_tune": 0
+    "fine_tune": 1
 }

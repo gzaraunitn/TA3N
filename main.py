@@ -36,7 +36,7 @@ gpu_count = torch.cuda.device_count()
 
 
 def main():
-    global args, best_prec1, writer, source_train_dir, traget_train_dir, val_dir, wandb_enabled, place_adv, batch_sizes
+    global args, best_prec1, writer, source_train_dir, traget_train_dir, val_dir, wandb_enabled, place_adv, batch_sizes, fine_tune
     args = parser.parse_args()
 
     with open("config.json", "r") as config_file:
@@ -141,6 +141,7 @@ def main():
         use_attn_frame=args.use_attn_frame,
         verbose=args.verbose,
         share_params=args.share_params,
+        fine_tune=fine_tune
     )
 
     if wandb_enabled:
