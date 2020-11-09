@@ -89,7 +89,7 @@ class VideoModel(nn.Module):
         use_attn="TransAttn",
         n_attn=1,
         use_attn_frame="none",
-        share_params="Y"
+        share_params="Y",
         fine_tune=False
     ):
         super(VideoModel, self).__init__()
